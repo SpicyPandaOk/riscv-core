@@ -1,0 +1,93 @@
+test1:
+    addi x1,x0,10
+    addi x2,x0,3
+    add x3,x1,x2
+    sub x4,x1,x2
+    and x5,x1,x2
+    or x6,x1,x2
+    xor x7,x1,x2
+    sll x8,x1,x2
+    srl x9,x1,x2
+    addi x10,x0,-8
+    sra x11,x10,x2
+    slt x12,x2,x1
+    sltu x13,x1,x2
+    sltiu x14,x0,1
+    slti x15,x0,-1
+    andi x16,x1,3
+    ori x17,x1,1
+    xori x18,x1,1
+    slli x19,x1,2
+    srli x20,x1,1
+    srai x21,x10,1
+test2:
+    addi x1,x0,-1
+    sw x1,0(x0)
+    lb x2,0(x0)
+    lbu x3,0(x0)
+    lh x4,0(x0)
+    lhu x5,0(x0)
+    lw x6,0(x0)
+    addi x7,x0,127
+    sb x7,4(x0)
+    lb x8,4(x0)
+    lbu x9,4(x0)
+    addi x10,x0,55
+    sw x10,8(x0)
+    lw x11,8(x0)
+    addi x12,x0,99
+    sw x12,12(x0)
+    lw x13,12(x0)
+    addi x14,x13,1
+test3:
+    addi x1,x0,5
+    addi x2,x0,5
+    beq x1,x2,t3_target1
+    addi x3,x0,111
+t3_target1:
+    addi x4,x0,222
+    addi x5,x0,1
+    bne x1,x2,t3_after_bne
+    addi x6,x0,77
+t3_after_bne:
+    jal x7,t3_jal_target
+    addi x8,x0,333
+t3_jal_target:
+    addi x9,x0,444
+test4:
+    auipc x20,0
+    addi x20,x20, t4_target
+    jalr x21,x20,0
+    addi x22,x0,1
+    addi x22,x0,2
+t4_trap:
+    beq x0,x0,t4_trap
+t4_target:
+    addi x23,x0,999
+test5:
+    lui x24,0x12345
+    auipc x25,0x1
+test6:
+    addi x1,x0,1
+    add x2,x1,x1
+    add x3,x2,x1
+    add x4,x3,x2
+    add x5,x4,x3
+test7:
+    addi x1,x0,5
+    addi x2,x0,5
+    beq x1,x2,t7_target
+    addi x26,x0,111
+    addi x27,x0,222
+t7_target:
+    addi x28,x0,444
+test8:
+    jal x0,t8_target
+    addi x26,x0,111
+    addi x27,x0,222
+    addi x26,x0,666
+    addi x28,x0,777
+t8_target:
+    addi x29,x0,999
+halt:
+    beq x0,x0,halt
