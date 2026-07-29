@@ -7,7 +7,7 @@ branches get resolved in EX, forwarding comes from EX_MEM and MEM_WB
 
 # repo layout
 ## docs 
-includes the makefile and the file list for use in compiling with icarus verilog
+includes the makefile and the file list for use in compiling with icarus verilog, as well as an overview of the architecture
 
 ## rtl
 folder with all of the rtl itself in system verilog files
