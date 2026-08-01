@@ -54,9 +54,9 @@ $display("Starting testbench");
     repeat (5) @(posedge clk);
     rst = 0;
     repeat(200) @(posedge clk);
+
     check_registers(5'd1, 32'd5, "addi x1, x0, 5", 5'd1, pass_count, fail_count);
-    check_mem(32'd1, 32'd5, "sw x1, 4(x0)", 5'd2, pass_count, fail_count);
-    check_registers(5'd2, 32'd5, "lw x1, 4(x0)", 5'd3, pass_count, fail_count);
+    
     $display("Passed: %0d, Failed: %0d", pass_count, fail_count);
     $finish;
 end

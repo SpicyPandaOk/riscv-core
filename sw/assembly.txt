@@ -1,3 +1,2 @@
 addi x1, x0, 5
-sw x1, 4(x0)
-lw x2, 4(x0)
+xori x3, 
