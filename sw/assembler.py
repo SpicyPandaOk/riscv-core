@@ -5,7 +5,8 @@
 
 
 import re
-
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 my_map = {
     'add' : (0b0110011, 0x0, 0x00),
@@ -54,7 +55,7 @@ my_map = {
 
 }
 hexout = ""
-with open('assembly.txt', 'r') as file:
+with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
     content = file.readlines()
     hexline = 0
 
@@ -234,7 +235,7 @@ with open('assembly.txt', 'r') as file:
         else:
             print(f"invalid instruction format, needs param or operation in line {index}")
 
-with open('instmemp.hex', 'w') as file:
+with open(os.path.join(SCRIPT_DIR, 'instmemp.hex'), 'w') as file:
     file.write((hexout))
 
             
