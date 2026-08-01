@@ -7,7 +7,7 @@ all: icarus
 
 icarus:
 	mkdir -p $(SIM_DIR)
-	iverilog -g2012 -I./rtl -o $(SIM_DIR)/sim.out -f $(FILELIST)
+	iverilog -g2012 -I../tb -I../rtl -o $(SIM_DIR)/sim.out -f $(FILELIST)
 	vvp $(SIM_DIR)/sim.out
 
 wave:

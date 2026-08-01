@@ -5,7 +5,7 @@ module instmem (
     reg [31:0] rom [0:255];
 
     initial begin
-        $readmemh("instmemp.hex", rom);
+        $readmemh("../sw/instmemp.hex", rom);
     end
 
     assign instr = rom[addr[9:2]];
