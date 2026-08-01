@@ -115,16 +115,10 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 funct3 = entry[1]
                 rd = int(params[0].strip("x "))
                 rs1 = int(params[1].strip("x "))
-                try: 
-                    if params[2].strip()[0] == '-':
-                        immparam = int(params[2].strip()) & 0xFFF
-
-                    else:
-
-                        immparam = int(params[2].strip())
+                try:
+                     immparam = int(params[2].strip()) & 0xFFF
                 except ValueError:
-                    immparam = labels[params[2].strip()] - (count - 4)
-
+                        immparam = (labels[params[2].strip()] - (count - 4)) & 0xFFF
                 if funct3 == 0x1 or funct3 == 0x5:
                     if(immparam > 31):
                         print("immediate is too large for shift, will be truncated")

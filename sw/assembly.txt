@@ -1,2 +1,5 @@
-addi x1, x0, 5
-xori x3, 
+addi x1, x0, 2
+addi x1, x1, -2
+#xori x2, x1, 3
+#ori x3, x1, 1
+#andi x4, x1, 3
