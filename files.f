@@ -1,2 +1,2 @@
-tb/tb_cpu.sv
+tb/my_tb.sv
 
