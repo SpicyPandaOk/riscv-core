@@ -1,3 +1,9 @@
+#custom built assembler that follows the RISC V documentation for the base instruction set
+#uses a map with all instructions, no pseudos however
+#can use labels attached to a colon, eg: my_label:
+#labels can be passed for jumps and branches as the target, or can be set as a number to be added to pc
+
+
 import re
 
 
