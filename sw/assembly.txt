@@ -1,5 +1,15 @@
-addi x1, x0, 2
-addi x1, x1, -2
-#xori x2, x1, 3
-#ori x3, x1, 1
-#andi x4, x1, 3
+test1_immediates:
+jal x1, end_trap
+addi x1, x0, 2 
+xori x2, x1, 3
+ori x3, x2, 1
+andi x4, x3, 3
+slli x5, x4, 2
+srli x6, x5, 2
+srai x7, x6, 1
+slti x8, x7, -3
+sltiu x9, x8, 5
+test2_base:
+end_trap:
+jal x1, end_trap
+
