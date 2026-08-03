@@ -6,7 +6,6 @@ reg rst;
 reg [31:0]pass_count = 0;
 reg [31:0]fail_count = 0;
 
-
 reg [256*8-1:0] line_buffer;
 string test_names [0:255];
 integer line_idx = 0;
@@ -19,13 +18,12 @@ task check_registers;
     input [4:0] reg_addr;
     input [31:0] comp_value;
 
-
     if(my_cpu.my_regs.registers[reg_addr]== comp_value) begin
-        $display("[PASS] test %0d: %-30s                        x%0h = %0d", task_count, test_names[task_count], reg_addr, comp_value);
+        $display("[PASS] test %0d: %-30s                        x%0d = %0d", task_count, test_names[task_count], reg_addr, comp_value);
         pass_count = pass_count + 1;
     end
     else begin
-        $display("[FAIL] test %0d: %-30s                        x%0h = %0d, expected %0d", task_count, test_names[task_count], reg_addr, my_cpu.my_regs.registers[reg_addr], comp_value);
+        $display("[FAIL] test %0d: %-30s                        x%0d = %0d, expected %0d", task_count, test_names[task_count], reg_addr, my_cpu.my_regs.registers[reg_addr], comp_value);
         fail_count = fail_count + 1;
     end
     repeat (1) @(posedge clk);
@@ -36,8 +34,6 @@ endtask
 task check_mem;
     input [31:0] mem_addr;
     input [31:0] comp_value;
-    input [31:0] test_num;
-
 
     if(my_cpu.my_dmem.data[mem_addr]== comp_value) begin
         $display("[PASS] test %0d: %s                        mem slot %0d = %0d", task_count, test_names[task_count], mem_addr, comp_value);
@@ -52,7 +48,6 @@ task check_mem;
 
 endtask
 
-
 always #5 clk <= ~clk;
 
 initial begin
@@ -61,7 +56,6 @@ initial begin
         $display("Error: Could not open assembly.txt");
         $finish;
     end
-
 
     while (!$feof(file_handle) && line_idx < 256) begin
         line_buffer = 0;
@@ -86,17 +80,14 @@ initial begin
 
 end
 
-
-
-
 initial begin;
     $display("Starting testbench");
     clk = 0;
     rst = 1;
     repeat (5) @(posedge clk);
     rst = 0;
-    repeat(5) @(posedge clk);
-
+    repeat(200) @(posedge clk);
+    $display("Starting first set of tests: immediates");
     check_registers(5'd1, 32'd2);
     check_registers(5'd2, 32'd1);
     check_registers(5'd3, 32'd1);
@@ -107,10 +98,26 @@ initial begin;
     check_registers(5'd8, 32'd0);
     check_registers(5'd9, 32'd1);
 
+    $display("Starting second set of tests: base arithmetic");
+    check_registers(5'd10, 32'd1);
+    check_registers(5'd11, 32'd0);
+    check_registers(5'd12, 32'd1);
+    check_registers(5'd13, 32'd1);
+    check_registers(5'd14, 32'd1);
+    check_registers(5'd15, 32'd2);
+    check_registers(5'd16, 32'd1);
+    check_registers(5'd17, 32'd0);
+    check_registers(5'd18, 32'd1);
+    check_registers(5'd19, 32'd0);
+    $display("Starting third set of tests: memory");
+    check_mem(32'd0, 32'd1);
+    check_mem(32'd1, 32'd1);
+    check_mem(32'd2, 32'd1);
+    check_registers(5'd20, 32'd1);
+    check_registers(5'd21, 32'd1);
+    check_registers(5'd22, 32'd1);
     $display("Passed: %0d, Failed: %0d", pass_count, fail_count);
     $finish;
 end
-
-
 
 endmodule
