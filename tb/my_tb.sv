@@ -100,6 +100,12 @@ initial begin;
     check_registers(5'd1, 32'd2);
     check_registers(5'd2, 32'd1);
     check_registers(5'd3, 32'd1);
+    check_registers(5'd4, 32'd1);
+    check_registers(5'd5, 32'd4);
+    check_registers(5'd6, 32'd1);
+    check_registers(5'd7, 32'd0);
+    check_registers(5'd8, 32'd0);
+    check_registers(5'd9, 32'd1);
 
     $display("Passed: %0d, Failed: %0d", pass_count, fail_count);
     $finish;
