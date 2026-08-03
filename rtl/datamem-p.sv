@@ -8,6 +8,13 @@ module data_mem(
     reg [31:0] data [0:255];
     wire [31:0] word;
     assign word = data[addr[9:2]];
+    integer i;
+    initial begin
+        for (i = 0; i < 256; i = i + 1) begin
+            data[i] = 32'b0;
+        end    
+    end
+    
 
     always@(*) begin
         read_data = 32'b0;
