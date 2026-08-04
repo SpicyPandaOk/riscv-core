@@ -108,13 +108,13 @@ module cpu (
     end
 
     
-    assign flush = EX_MEM_branch_taken || EX_MEM_jump || EX_MEM_jalr;
+    assign flush = branch_taken || EX_MEM_jump || EX_MEM_jalr;
 
 
     prog_counter my_pc (
         .clk(clk),
         .rst(rst),
-      .b_ena(EX_MEM_branch_taken || EX_MEM_jump || EX_MEM_jalr),
+      .b_ena(branch_taken || EX_MEM_jump || EX_MEM_jalr),
         .addr(pc),
         .target(EX_MEM_branch_target),
         .stall(stall)
@@ -284,7 +284,8 @@ module cpu (
             if(flush) begin
               
                 IF_ID_instr <= 32'b0;
-              
+                IF_ID_pc <= 32'hFFFF_FFFF;
+                
                 ID_EX_reg_write <= 1'b0;
                 ID_EX_data_write <= 1'b0;
                 ID_EX_mem_to_reg <= 1'b0;
