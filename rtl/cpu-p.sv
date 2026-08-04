@@ -120,6 +120,8 @@ module cpu (
         .stall(stall)
     );
 
+
+
     instmem my_imem (
         .addr(pc),
         .instr(instr)
@@ -213,8 +215,10 @@ module cpu (
 
     always@(posedge clk) begin
         if(rst) begin
-            IF_ID_pc <= 32'b0;
+            IF_ID_pc <= 32'hFFFF_FFFF;
             IF_ID_instr <= 32'b0;
+
+            ID_EX_pc <= 32'hFFFF_FFFF;
             ID_EX_reg_write <= 1'b0;
             ID_EX_data_write <= 1'b0;
             ID_EX_mem_to_reg <= 1'b0;
@@ -225,11 +229,11 @@ module cpu (
             ID_EX_ALU_src <= 1'b0;
             ID_EX_ALU_sel <= 5'b0;
 
-             EX_MEM_ALU_result    <= 1'b0;
-            EX_MEM_r2            <= 1'b0;
-            EX_MEM_addr          <= 1'b0;
-            EX_MEM_funct3        <= 1'b0;
-            EX_MEM_rd            <= 1'b0;
+            EX_MEM_ALU_result    <= 32'b0;
+            EX_MEM_r2            <= 32'b0;
+            EX_MEM_addr          <= 32'b0;
+            EX_MEM_funct3        <= 3'b0;
+            EX_MEM_rd            <= 5'b0;
             EX_MEM_mem_to_reg    <= 1'b0;
             EX_MEM_branch        <= 1'b0;
             EX_MEM_jump          <= 1'b0;
@@ -239,8 +243,9 @@ module cpu (
             EX_MEM_overflow      <= 1'b0;
             EX_MEM_negative      <= 1'b0;
             EX_MEM_branch_target <= 1'b0;
-            EX_MEM_pc            <= 1'b0;
+            EX_MEM_pc            <= 32'hFFFF_FFFF;
 
+            MEM_WB_pc           <= 32'hFFFF_FFFF;
             MEM_WB_reg_write <= 1'b0;
             MEM_WB_mem_to_reg <= 1'b0;
             MEM_WB_jump <= 1'b0;
@@ -289,7 +294,7 @@ module cpu (
                 ID_EX_jalr <= 1'b0;
                 ID_EX_ALU_src <= 1'b0;
                 ID_EX_ALU_sel <= 5'b0;
-              	ID_EX_pc <= 32'b0;
+              	ID_EX_pc <= 32'hFFFF_FFFF;
                 ID_EX_r1 <= 32'b0;
                 ID_EX_r2 <= 32'b0;
                 ID_EX_rs1 <= 5'b0;
