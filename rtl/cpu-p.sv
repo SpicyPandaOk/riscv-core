@@ -116,7 +116,7 @@ module cpu (
         .rst(rst),
       .b_ena(branch_taken || ID_EX_jump || ID_EX_jalr),
         .addr(pc),
-        .target(EX_MEM_branch_target),
+        .target(branch_target),
         .stall(stall)
     );
 
