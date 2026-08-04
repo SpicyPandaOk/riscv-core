@@ -306,12 +306,7 @@ module cpu (
                 ID_EX_funct7 <= 7'b0;
                 ID_EX_opcode <= 7'b0;
               
-              	EX_MEM_reg_write <= 1'b0;
-                EX_MEM_data_write <= 1'b0;
-                EX_MEM_data_read <= 1'b0;
-                EX_MEM_jump <= 1'b0;
-                EX_MEM_jalr <= 1'b0;
-                EX_MEM_branch_taken <= 1'b0;
+              	
             end
 
             else if(stall) begin
