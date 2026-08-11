@@ -104,36 +104,6 @@ endtask
 
 
 
-initial begin
-    file_handle = $fopen("../sw/assembly.txt", "r");
-    if (file_handle == 0) begin
-        $display("Error: Could not open assembly.txt");
-        $finish;
-    end
-
-    while (!$feof(file_handle) && line_idx < 256) begin
-        line_buffer = 0;
-        if ($fgets(line_buffer, file_handle)) begin
-            line_str = string'(line_buffer);
-            while (line_str.len() > 0 && line_str[line_str.len()-1] < 8'h20) begin
-                line_str = line_str.substr(0, line_str.len()-2);
-            end
-            if (line_str.len() > 0 && line_str[0] != "#" && !(line_str.substr(line_str.len()-1, line_str.len()-1) == ":")) begin
-                test_names[line_idx] = line_str;
-                pc_counts[line_idx] = line_idx * 4;
-                line_idx = line_idx + 1;
-            end
-        end
-    end
-    $fclose(file_handle);
-
-    $display("\nTotal lines read: %0d", line_idx);
-
-end
-
-
-
-
 initial begin;
     $display("Starting testbench");
     clk = 0;
