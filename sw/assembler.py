@@ -6,8 +6,14 @@
 
 import re
 import os
+import sys
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+if len(sys.argv) > 1:
+    asm_path = os.path.abspath(sys.argv[1])
+else:
+    asm_path = os.path.join(SCRIPT_DIR, 'assembly.txt')
 my_map = {
     'add' : (0b0110011, 0x0, 0x00),
     'sub' : (0b0110011, 0x0, 0x20),
@@ -101,12 +107,32 @@ def decode_pseudo(pseudo_code, operands):
                 temp_line += part + ", "
             ret_line = temp_line.rstrip(", ")
 
-    return ret_line + "\n"    
+    return ret_line + "\n"
+
+def adv_decode(pseudo_code, operands):
+    final_line = []
+    temp_line = ""
+    imm = int(operands[1])
+    if imm >= 2047 or imm <= -2048 :
+
+        upper =  (imm + 0x800) >> 12
+        lower = imm - (upper << 12)
+        temp_line =  "lui " + operands[0] + ", " + str(upper)
+        final_line.append(temp_line)
+
+        temp_line = "addi " + operands[0] + ", " + operands[0] + ", " + str(lower)
+        final_line.append(temp_line)
+
+    else:
+        temp_line += "addi " + operands[0] + ", "  + "x0, " + str(imm)
+        final_line.append(temp_line)
+
+    return final_line
 
 
 
 
-with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
+with open(asm_path, 'r') as file:
 
     pseudo_content = file.readlines()
     print_line = ""
@@ -122,6 +148,11 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
             if instr in pseudo_map:
                 new_cont = decode_pseudo(instr, operands)
                 content.append(new_cont)
+            elif instr == "li":
+
+                new_cont = adv_decode(instr, operands)
+                for line in new_cont:
+                    content.append(line)
             else:
                 content.append(line)
         else:
@@ -167,7 +198,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                     
 
             except KeyError:
-                print(f"malformed instruction, key not in values at {index}")
+                print(f"malformed instruction, key not in values at {index}, {tokens[0]}")
                 valid_instr = False
                 continue
 
@@ -184,7 +215,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 
 
             elif opcode == 0b0110011:
-                print(f"Invalid R type instruction in line {index}")
+                print(f"Invalid R type instruction in line {index}, {tokens[0]}")
                 valid_instr = False
 
             elif opcode == 0b0010011 and len(params) == 3: #I type
@@ -198,7 +229,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                         immparam = (labels[params[2].strip()] - (count - 4)) & 0xFFF
                 if funct3 == 0x1 or funct3 == 0x5:
                     if(immparam > 31):
-                        print("immediate is too large for shift, will be truncated")
+                        print(f"immediate is too large for shift, will be truncated at {index}, {tokens[0]}")
 
                     imm = entry[2] << 5 | immparam
 
@@ -209,7 +240,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
 
 
             elif opcode == 0b0010011:
-                print(f"Invalid I type instruction in line {index}")
+                print(f"Invalid I type instruction in line {index}, {tokens[0]}")
                 valid_instr = False
             
             elif opcode == 0b0000011 and len(params) == 3: #loads
@@ -222,7 +253,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 intline = imm << 20 | rs1 << 15 | funct3 << 12 | rd << 7 | opcode
 
             elif opcode == 0b0000011:
-                print(f"invalid Load instruction in line {index}")
+                print(f"invalid Load instruction in line {index}, {tokens[0]}")
                 valid_instr = False 
 
             elif opcode == 0b0100011 and len(params) == 3: #saves
@@ -235,7 +266,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 intline =  ((imm >> 5) & 0x7F) << 25 | rs2 << 20 |  rs1 << 15 | funct3 << 12 | (imm & 0x1F) << 7  | opcode
 
             elif opcode == 0b0100011:
-                print(f"invalid save instruction in line {index}")
+                print(f"invalid save instruction in line {index}, {tokens[0]}")
                 valid_instr = False
 
             elif opcode == 0b1100011 and len(params) == 3: #branch
@@ -251,7 +282,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 intline = (imm >> 12) << 31| ((imm >> 5) & 0x3F)  << 25 | rs2 << 20 | rs1 << 15 | funct3 << 12 |  ((imm >> 1) & 0xF) << 8 | ((imm >> 11) & 0x1) << 7 | opcode  
 
             elif opcode == 0b1100011:
-                print(f"invalid Branch instruction in line {index}")
+                print(f"invalid Branch instruction in line {index}, {tokens[0]}")
                 valid_instr = False
 
             elif opcode == 0b1101111 and len(params) == 2: #jal
@@ -272,7 +303,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 intline = (imm >> 20) << 31 | ((imm >> 1) & 0x3FF) << 21 | ((imm >> 11) & 0x1) << 20 | ((imm >> 12) & 0xFF) << 12 | rd << 7 | opcode
 
             elif opcode == 0b1101111:
-                print(f"invalid jump instruction on line {index}")
+                print(f"invalid jump instruction on line {index}, {tokens[0]}")
                 valid_instr = False
 
 
@@ -303,6 +334,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
 
             else:
                 print(f"Unhandled instruction or missing opcode handler on line {index}: {tokens[0]}")
+                print(tokens)
                 valid_instr = False
 
             if valid_instr:
