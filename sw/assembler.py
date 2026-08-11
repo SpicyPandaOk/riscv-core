@@ -54,9 +54,88 @@ my_map = {
     'auipc': (0b0010111,)
 
 }
+
+
+pseudo_map = {
+    'nop': ('addi', ['x0', 'x0', '0']),
+    'mv' : ('addi', ['{0}', '{1}', '0' ]),
+
+    'not' : ('xori', ['{0}', '{1}', '-1']),
+    'neg': ('sub', ['{0}', 'x0', '{1}']),
+
+    'seqz':('sltiu', ['{0}', '{1}', '1']),
+    'snez':('sltu', ['{0}', 'x0', '{1}']),
+    'sltz':('slt', ['{0}', '{1}', 'x0']),
+    'sgtz':('slt', ['{0}', 'x0', '{1}']),
+
+    'beqz':('beq', ['{0}', 'x0', '{1}']),
+    'bnez':('bne', ['{0}', 'x0', '{1}']),
+    'blez':('bge', ['x0', '{0}', '{1}']),
+    'bgez':('bge', ['{0}', 'x0', '{1}']),
+    'bltz':('blt', ['{0}', 'x0', '{1}']),
+    'bgtz':('blt', ['x0', '{0}', '{1}']),
+
+    'bgt':('blt', ['{1}', '{0}', '{2}']),
+    'ble':('bge', ['{1}', '{0}', '{2}']),
+    'bgtu':('bltu', ['{1}', '{0}', '{2}']),
+    'bleu':('bgeu', ['{1}', '{0}', '{2}']),
+
+    'j':('jal', ['x0', '{0}']),
+    'jr':('jalr', ['x0', '{0}', '0']),
+    'ret':('jalr', ['x0', 'x1', '0']),
+    'call':('jal', ['x1', '{0}'])
+}
+
 hexout = ""
+
+def decode_pseudo(pseudo_code, operands):
+    temp_line = ""
+    new_op, template = pseudo_map[pseudo_code]
+    temp_line += new_op + " "
+    if template:
+        for part in template:
+            if part.startswith("{"):
+
+                temp_line += operands[int(part[1])] + ", "
+            else:
+                temp_line += part + ", "
+            ret_line = temp_line.rstrip(", ")
+
+    return ret_line + "\n"    
+
+
+
+
 with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
-    content = file.readlines()
+
+    pseudo_content = file.readlines()
+    print_line = ""
+    content = []
+    for line in pseudo_content:
+        stripped = line.strip().split('#')[0]
+        if stripped and not stripped.endswith(":"):
+            instr = stripped.split(" ", 1)[0]
+            try: 
+                operands = [item.strip() for item in stripped.split(" ", 1)[1].split(",")]
+            except IndexError:
+                operands = []
+            if instr in pseudo_map:
+                new_cont = decode_pseudo(instr, operands)
+                content.append(new_cont)
+            else:
+                content.append(line)
+        else:
+            content.append(line)
+
+
+
+    for line in content:
+        print(line.strip())
+
+
+
+
+
     hexline = 0
 
     labels = {}
@@ -68,6 +147,9 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
             labels[stripped[:-1]] = count
         elif stripped and not stripped.startswith('#'):
             count += 4
+
+
+
 
     count = 0
     for index, line in enumerate(content):
@@ -177,7 +259,7 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 print(f"invalid Branch instruction in line {index}")
                 valid_instr = False
 
-            elif opcode == 0b1101111 and len(params) == 2:
+            elif opcode == 0b1101111 and len(params) == 2: #jal
 
                 rd = int(params[0].strip("x "))
                 try:
@@ -187,13 +269,20 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
 
                 intline = (imm >> 20) << 31 | ((imm >> 1) & 0x3FF) << 21 | ((imm >> 11) & 0x1) << 20 | ((imm >> 12) & 0xFF) << 12 | rd << 7 | opcode
 
+
+            elif opcode == 0b1101111 and len(params) == 1: #jal shorthand
+                rd = 1
+                imm = (labels[params[0].strip()] - count) & 0x1FFFFF
+
+                intline = (imm >> 20) << 31 | ((imm >> 1) & 0x3FF) << 21 | ((imm >> 11) & 0x1) << 20 | ((imm >> 12) & 0xFF) << 12 | rd << 7 | opcode
+
             elif opcode == 0b1101111:
                 print(f"invalid jump instruction on line {index}")
                 valid_instr = False
 
 
             
-            elif opcode in (0b0110111, 0b0010111) and len(params) == 2: 
+            elif opcode in (0b0110111, 0b0010111) and len(params) == 2: #lui, auipc
                 rd = int(params[0].strip("x "))
                 imm = int(params[1].strip(), 16) if '0x' in params[1] else int(params[1].strip())
                 imm = imm & 0xFFFFF
@@ -207,6 +296,15 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
                 imm = int(params[2].strip()) & 0xFFF
                 
                 intline = (imm << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
+
+            elif opcode == 0b1100111 and len(params) == 1: #jalr shortcut
+                funct3 = entry[1]
+                rd = 1
+                rs1 = int(params[0].strip("x "))
+                imm = 0
+                
+                intline = (imm << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
+
 
             else:
                 print(f"Unhandled instruction or missing opcode handler on line {index}: {tokens[0]}")
