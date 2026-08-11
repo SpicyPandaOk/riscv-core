@@ -129,11 +129,6 @@ with open(os.path.join(SCRIPT_DIR, 'assembly.txt'), 'r') as file:
 
 
 
-    for line in content:
-        print(line.strip())
-
-
-
 
 
     hexline = 0
