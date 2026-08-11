@@ -1,2 +1,2 @@
-../tb/my_tb.sv
+../tb/testmy_tb.sv
 
