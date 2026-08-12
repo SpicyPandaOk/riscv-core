@@ -1,4 +1,4 @@
 sim.out
 run.out
 test.out
-instmemp.hex
+../sw/instmemp.hex
