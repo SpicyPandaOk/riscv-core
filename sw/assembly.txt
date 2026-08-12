@@ -1,6 +1,6 @@
 main:
     li x2, 1020 # stack pointer
-    li x10, 5 # n
+    li x10, 12 # n
     call sum_to
 
 halt2:

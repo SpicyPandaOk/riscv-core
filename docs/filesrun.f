@@ -1,1 +1,1 @@
-../tb/my_test.sv
+../tb/my_run.sv
