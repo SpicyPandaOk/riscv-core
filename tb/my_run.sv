@@ -5,13 +5,39 @@ module tb_cpu ();
 reg clk;
 reg rst;
 
-reg [31:0] result;
 
+wire [31:0] mem_wb_pc;
+reg [31:0] last_mem_wb_pc;
+
+
+integer same_pc_count = 0;
+localparam halt_thresh = 8;
 
 cpu my_cpu(.clk(clk), .rst(rst));
 
 always #5 clk <= ~clk;
 
+assign mem_wb_pc = my_cpu.MEM_WB_pc;
+
+
+
+    
+always @(posedge clk) begin
+    if(!rst) begin
+        if(mem_wb_pc !== 32'hffffffff) begin
+            if(mem_wb_pc == last_mem_wb_pc)
+            begin
+                same_pc_count <= same_pc_count + 1;
+
+            end
+            else begin
+                same_pc_count <= 0;
+            end
+            last_mem_wb_pc <= mem_wb_pc;
+        end
+       
+    end
+end
 
 task startup;
     rst = 1;
@@ -23,17 +49,19 @@ task startup;
 
 endtask
 
+
 task run_prog;
-    input [31:0] cycles;
-    repeat (cycles) @(posedge clk);
-endtask
+    while(same_pc_count < halt_thresh) begin
+        @(posedge clk);
+    end
+endtask    
 
 
 integer i;
 
 initial begin
     startup();
-    run_prog(200);
+    run_prog();
 
     $display("-----FINAL REGS-----");
     for(i = 0; i < 32; i = i + 1) begin
@@ -46,4 +74,5 @@ initial begin
     end
     $finish;
 end
+
 endmodule
