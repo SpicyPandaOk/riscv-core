@@ -1,10 +1,10 @@
 main:
     li x2, 1020 # stack pointer
-    li x10, 12 # n
+    li x10, 125 # n
     call sum_to
 
-halt2:
-    j halt2
+halt:
+    j halt
 
 sum_to:
     beqz x10, base_case
