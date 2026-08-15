@@ -57,6 +57,14 @@ task run_prog;
 endtask    
 
 
+
+task stall_time;
+    input integer max_cycles;
+    repeat (max_cycles) @(posedge clk);
+    $finish;
+endtask
+
+
 integer i;
 
 initial begin
@@ -75,4 +83,7 @@ initial begin
     $finish;
 end
 
+initial begin
+    stall_time(500);
+end
 endmodule
