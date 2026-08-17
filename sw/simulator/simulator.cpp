@@ -2,6 +2,7 @@
 #include <vector>
 #include "InstDecoder.hpp"
 #include "Control.hpp"
+#include "AluControl.hpp"
 #include <iostream>
 
 int main(){
