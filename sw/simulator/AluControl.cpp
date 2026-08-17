@@ -81,9 +81,12 @@ AluType runAluControl(DecodedInstr d, uint32_t instr)
                 }
                 case 0x7:{
                     sel = AluType::ALU_and;
+                    break;
                 }
                 case 0x1:{
                     sel = AluType::ALU_sll;
+                    break;
+
                 }
                 case 0x5:{
                     if(((instr >> 5) & 0x7f) == 0x00){
@@ -92,12 +95,15 @@ AluType runAluControl(DecodedInstr d, uint32_t instr)
                     else{
                         sel = AluType::ALU_sra;
                     }
+                    break;
                 }
                 case 0x2:{
                     sel = AluType::ALU_slt;
+                    break;
                 }
                 case 0x3:{
                     sel = AluType::ALU_sltu;
+                    break;
                 }
                 
             }
@@ -105,26 +111,33 @@ AluType runAluControl(DecodedInstr d, uint32_t instr)
         case 0b0000011:
         {
             sel = AluType::ALU_add;
+            break;
         }
         case 0b0100011:
         {
             sel = AluType::ALU_add;
+            break;
         }
         case 0b1100011:{
             sel = AluType::ALU_sub;
+            break;
         }
         case 0b1101111:{
             sel = AluType::ALU_add;
+            break;
         }
         case 0b1100111:
         {
             sel = AluType::ALU_add;
+            break;
         }
         case 0b0110111:{
             sel = AluType::ALU_add;
+            break;
         }
         case 0b0010111:{
             sel = AluType::ALU_add;
+            break;
         }
     }
     return sel;
