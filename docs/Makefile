@@ -3,8 +3,8 @@ FILELIST_TEST = filestest.f
 FILELIST_RUN = filesrun.f
 ASSEMBLER = ../sw/assembler.py
 
-TEST_PROGRAM = ../sw/testassembly.txt
-PROGRAM ?= ../sw/assembly.txt
+TEST_PROGRAM = ../sw/testassembly.asm
+PROGRAM ?= ../sw/sum_to.asm
 
 .PHONY: all icarus wave clean
 

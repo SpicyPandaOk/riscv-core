@@ -83,7 +83,7 @@ initial begin
     $finish;
 end
 
-initial begin
-    stall_time(500);
-end
+/*initial begin
+    stall_time(500000);
+end*/
 endmodule
