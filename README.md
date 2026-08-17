@@ -13,11 +13,9 @@ includes the makefile and the file list for use in compiling with icarus verilog
 folder with all of the rtl itself in system verilog files
 
 ## sw
-Python assembler as well as sample assembly and hex code currently set up to work with the testbench
-
+Python assembler with a testbench paired assembly file as well as several functional programs
 ## tb
-the testbench .sv file with a series of tasks to show functionality of all aspects of the cpu
-
+the test suite tb.sv along with a tb for running programs
 
 
 # running
@@ -96,10 +94,10 @@ Copyright (c) 2001-2021 Stephen Williams (steve@icarus.com)
   with this program; if not, write to the Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-### compile and run with "make icarus"
+### compile and run with either "make test" for test suite or "make run" to run a program. to choose a file use "make run PROGRAM=../sw/{file_name}"
 
 # testing
 ### uses a series of tests to run through different capabilities of the cpu with a task feature to show quickly what areas are not functioning if bugs present
 
 # limitations
-### no advanced memory options such as cache etc, only 256 program memory size.
+### no advanced memory options such as cache etc, only 256 program memory size. No branch prediction and only 1  KB of datamem
