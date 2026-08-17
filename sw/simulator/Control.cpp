@@ -13,7 +13,7 @@ struct ControlSignal
     bool jalr = 0;
 };
 
-ControlSignal control(DecodedInstr d)
+ControlSignal runControl(DecodedInstr d)
 {
     ControlSignal c;
 
