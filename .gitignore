@@ -2,3 +2,6 @@ sim.out
 run.out
 test.out
 ../sw/instmemp.hex
+../sw/simulator/instDecoder.o
+../sw/simulator/simulator
+../sw/simulator/simulator.o
