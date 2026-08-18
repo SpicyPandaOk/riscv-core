@@ -70,6 +70,9 @@ AluOut runAlu(AluType sel, int32_t r1, int32_t r2){
             a.result = sltuOut;
             break;
         }
+        case AluType::Invalid:{
+            a.result = static_cast<int32_t>(addOut);
+        }
 
 
     }
