@@ -3,6 +3,8 @@
 #include "InstDecoder.hpp"
 #include "Control.hpp"
 #include "AluControl.hpp"
+#include "Alu.hpp"
+#include "Memory.hpp"
 #include <iostream>
 
 int main(){
