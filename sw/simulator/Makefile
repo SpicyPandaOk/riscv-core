@@ -1,7 +1,7 @@
 CXX =  g++
 CXXFLAGS = -std=c++17 -Wall
 
-SRCS= simulator.cpp InstDecoder.cpp Control.cpp AluControl.cpp Alu.cpp Memory.cpp
+SRCS= Cpu.cpp InstDecoder.cpp Control.cpp AluControl.cpp Alu.cpp Memory.cpp Main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 simulator: $(OBJS)
