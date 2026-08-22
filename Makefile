@@ -18,6 +18,8 @@ rtl-run:
 rtl:
 	$(MAKE) -C docs run PROGRAM=../sw/$(PROGRAM)
 
+rtl-test:
+	$(MAKE) -C docs test
 
 
 cpp-run: assemble
