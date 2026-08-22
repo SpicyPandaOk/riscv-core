@@ -8,5 +8,5 @@
 #include "Memory.hpp"
 #include <iostream>
 
-void step(CpuState state);
-void detectHalt(CpuState state, uint32_t lastPc, int& haltCount);
+void step(CpuState& state);
+void detectHalt(CpuState& state, uint32_t lastPc, int& haltCount);

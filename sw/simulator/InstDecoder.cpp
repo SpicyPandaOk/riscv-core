@@ -71,7 +71,7 @@ DecodedInstr decode(uint32_t instr)
             d.imm += ((instr >> 8) & 0xf) << 1;
             d.imm += ((instr >> 7) & 0x1) << 11;
             d.inst_type = InstType::B_type;
-            d.imm += ((static_cast<int32_t>(instr) >> 31) <<12);
+            d.imm += ((static_cast<int32_t>(instr) >> 31) <<13);
             break;
 
         }

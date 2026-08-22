@@ -13,7 +13,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if len(sys.argv) > 1:
     asm_path = os.path.abspath(sys.argv[1])
 else:
-    asm_path = os.path.join(SCRIPT_DIR, 'assembly.txt')
+    asm_path = os.path.join(SCRIPT_DIR, 'assembly.asm')
 my_map = {
     'add' : (0b0110011, 0x0, 0x00),
     'sub' : (0b0110011, 0x0, 0x20),

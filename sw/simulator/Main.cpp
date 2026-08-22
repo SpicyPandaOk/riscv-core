@@ -15,7 +15,8 @@ int main() {
     std::string outline = "";
 
 
-    readHexFile("../sw/instmemp.hex", state);
+    std::string address = "sw/instmemp.hex";
+    readHexFile(address, state);
     int haltCount = 0;
     uint32_t lastPc = 0;
     while(!state.halted){
@@ -25,11 +26,13 @@ int main() {
     }
 
     for(int i = 0; i < 32; i++){
-        outline += "Reg" + std::to_string(i) + ": " + std::to_string(state.regs[i]) + "\n";
+        outline += "x" + std::to_string(i) + " = " + std::to_string(state.regs[i]) + "\n";
+    }
+    for(int i = 0; i < 16; i++){
+        outline += "mem[" + std::to_string(i) + "] = " + std::to_string(state.dmem[i]) + "\n";
     }
 
     std::cout << outline;
-    std::cout << "HI";
 
 
 

@@ -6,7 +6,7 @@
 
 #include "Control.hpp"
 #include "InstDecoder.hpp"
-
+#include "Alu.hpp"
 
 struct CpuState{
     uint32_t pc = 0;
@@ -15,6 +15,64 @@ struct CpuState{
     uint32_t dmem[256] = {0};
     bool halted = false;
 };
+
+bool decBranch(CpuState& state, ControlSignal cs, DecodedInstr d, int32_t r1, int32_t r2){
+    bool bt = false;
+    if(cs.jump || cs.jalr){
+        bt = true;
+    }
+    else if (cs.branch){
+        switch(d.funct3){
+            case 0x0:{
+                bt = (r1 == r2);
+                break;
+            }
+            case 0x1:{
+                bt = (r1 != r2);
+                break;
+            }
+            case 0x4:{
+                bt = (r1 < r2);
+                break;
+            }
+            case 0x5:{
+                bt = (r1 >= r2);
+                break;
+            }
+            case 0x6:{
+                bt = (static_cast<uint32_t>(r1) < static_cast<uint32_t>(r2));
+                break;
+            }
+            case 0x7:{
+                bt = (static_cast<uint32_t>(r1) >= static_cast<uint32_t>(r2));
+                break;
+            }
+        }
+    }
+
+    return bt;
+}
+
+
+void updatePc(CpuState& state, ControlSignal cs, uint32_t branchTarget, bool bt){
+    if(bt){
+        state.pc = branchTarget;
+    }
+    else{
+        state.pc += 4;
+    }
+}
+
+int32_t calcBtarget(CpuState& state, ControlSignal cs, AluOut ao, int32_t r1, DecodedInstr d){
+    int32_t bTarget = 0;
+    if(cs.jalr){
+        bTarget = (d.imm + r1); 
+    }
+    else{
+        bTarget = state.pc + d.imm;
+    }
+    return bTarget;
+}
 
 void readHexFile(const std::string& filename, CpuState& cs)
 {
@@ -138,12 +196,11 @@ int32_t readMem(CpuState& cu, ControlSignal cs, DecodedInstr d, uint32_t addr){
 }
 
 
-
 void writeMem(CpuState& state, ControlSignal cs, DecodedInstr d, uint32_t data, uint32_t addr){
 
     uint8_t shrtAddr = (addr >> 2);
 
-    if(cs.regWrite){
+    if(cs.dataWrite){
         switch(d.funct3){
             case 0x0:
             {

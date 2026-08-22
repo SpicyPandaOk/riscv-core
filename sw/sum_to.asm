@@ -1,5 +1,5 @@
 main:
-    li x10, 98000 # n
+    li x10, 10 # n
     call sum_to
 
 halt:

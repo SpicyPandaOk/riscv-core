@@ -7,7 +7,7 @@
 #include "Memory.hpp"
 #include <iostream>
 
-void step(CpuState state)
+void step(CpuState& state)
 {
     uint32_t instr = state.imem[state.pc >> 2];
     DecodedInstr d  = decode(instr);
@@ -18,11 +18,20 @@ void step(CpuState state)
     AluOut ao = runAlu(sel, r1, (cs.aluSrc) ? d.imm : r2 );
     int32_t memRes = readMem(state, cs, d, ao.result);
     writeMem(state, cs, d, r2, ao.result);
-    writeReg(state,cs, d, (cs.memToReg ? memRes : ao.result));
-
+    bool bt = decBranch(state, cs, d, r1, r2);
+    int32_t branchTarget = calcBtarget(state, cs, ao, r1, d);
+    int32_t regData = ao.result;
+    if(cs.memToReg){
+        regData = memRes; 
+    }
+    else if(cs.jump || cs.jalr){
+        regData = state.pc + 4;
+    }
+    writeReg(state,cs, d, regData);
+    updatePc(state, cs, branchTarget, bt);
 }
 
-void detectHalt(CpuState state, uint32_t lastPc, int& haltCount){
+void detectHalt(CpuState& state, uint32_t lastPc, int& haltCount){
 
     if(state.pc == lastPc){
         haltCount++;
@@ -30,6 +39,7 @@ void detectHalt(CpuState state, uint32_t lastPc, int& haltCount){
     else{
         haltCount = 0;
     }
-
-    state.halted = true;
+    if(haltCount >= 8){
+        state.halted = true;
+    }
 }
