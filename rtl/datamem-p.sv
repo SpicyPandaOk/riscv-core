@@ -5,12 +5,12 @@ module data_mem(
     output reg [31:0] read_data
 );
 
-    reg [31:0] data [0:255];
+    reg [31:0] data [0:511];
     wire [31:0] word;
-    assign word = data[addr[9:2]];
+    assign word = data[addr[10:2]];
     integer i;
     initial begin
-        for (i = 0; i < 256; i = i + 1) begin
+        for (i = 0; i < 512; i = i + 1) begin
             data[i] = 32'b0;
         end    
     end
