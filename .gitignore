@@ -5,3 +5,4 @@ sw/instmemp.hex
 sw/simulator/*.o
 sw/simulator/simulator
 sim/
+sw/*.asm

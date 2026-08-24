@@ -1,5 +1,5 @@
 main:
-    li x10, 30
+    li x10, 20
     li x5, 0
     
     call fib
