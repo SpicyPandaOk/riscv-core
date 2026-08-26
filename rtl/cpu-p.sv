@@ -9,6 +9,8 @@
 `include "registers-p.sv"
 `include "instmem-p.sv"
 `include "progcounter-p.sv"
+`include "branchpredict-p.sv"
+
 
 module cpu (
     input clk, rst
@@ -16,6 +18,7 @@ module cpu (
 
     reg [31:0] IF_ID_pc;
     reg [31:0] IF_ID_instr;
+    reg IF_ID_branch_taken;
 
     reg [31:0] ID_EX_pc;
     reg [31:0] ID_EX_r1, ID_EX_r2;
@@ -25,13 +28,17 @@ module cpu (
     reg [6:0] ID_EX_funct7, ID_EX_opcode;
     reg ID_EX_reg_write, ID_EX_mem_to_reg, ID_EX_data_read, ID_EX_data_write, ID_EX_branch, ID_EX_jump, ID_EX_jalr, ID_EX_ALU_src;
     reg [4:0] ID_EX_ALU_sel;
+    reg ID_EX_branch_taken;
 
 
 
     reg [31:0] EX_MEM_ALU_result, EX_MEM_r2, EX_MEM_addr, EX_MEM_pc;
     reg [4:0] EX_MEM_rd;
     reg [2:0] EX_MEM_funct3;
-    reg EX_MEM_reg_write, EX_MEM_mem_to_reg, EX_MEM_data_read, EX_MEM_data_write, EX_MEM_branch, EX_MEM_jump, EX_MEM_jalr, EX_MEM_branch_taken, EX_MEM_zero, EX_MEM_overflow, EX_MEM_negative;
+    reg EX_MEM_reg_write, EX_MEM_mem_to_reg, EX_MEM_data_read, EX_MEM_data_write, EX_MEM_branch, EX_MEM_jump, EX_MEM_jalr,  EX_MEM_zero, EX_MEM_overflow, EX_MEM_negative;
+    reg EX_MEM_branch_taken;
+    reg EX_MEM_real_branch_taken;
+    reg [31:0] EX_MEM_real_branch_target;
     reg [31:0] EX_MEM_branch_target;
 
     reg [31:0] MEM_WB_ALU_result, MEM_WB_read_data, MEM_WB_pc;
@@ -50,22 +57,48 @@ module cpu (
 
 
     reg [1:0] fwd_a, fwd_b;
-    reg [31:0] alu_a, alu_a_reg, alu_b, alu_b_reg, branch_target;
+    reg [31:0] alu_a, alu_a_reg, alu_b, alu_b_reg;
     reg[31:0] wb_data;
     wire stall;
+
+
+    reg [31:0] branch_target;
+    reg [31:0] real_branch_target;
     reg branch_taken;
+    reg real_branch_taken;
+
+    reg [31:0] pc_branch_target;
+
+    always@(*) begin
+        
+        if(ID_EX_jump || ID_EX_jalr) begin
+            pc_branch_target = real_branch_target;
+        end
+        else if (ID_EX_branch_taken && ~real_branch_taken) begin
+            pc_branch_target = ID_EX_pc + 4;
+        end
+        else if(~ID_EX_branch_taken && real_branch_taken) begin
+            pc_branch_target = real_branch_target;
+        end
+        else if (branch_taken) begin
+            pc_branch_target = branch_target;
+        end
+        else begin
+            pc_branch_target = ID_EX_pc + 4;
+        end
+    end
 
     always @(*) begin
-        branch_taken = 1'b0;
+        real_branch_taken = 1'b0;
         if(ID_EX_branch) begin
             case (ID_EX_funct3)
-                3'h0: branch_taken = alu_a_reg == alu_b_reg;
-                3'h1: branch_taken = alu_a_reg != alu_b_reg;
-                3'h4: branch_taken = ($signed(alu_a_reg) < $signed(alu_b_reg));
-                3'h5: branch_taken = ($signed(alu_a_reg) >= $signed(alu_b_reg));
-                3'h6: branch_taken = alu_a_reg < alu_b_reg;
-                3'h7: branch_taken = alu_a_reg >= alu_b_reg;
-                default: branch_taken = 1'b0;
+                3'h0: real_branch_taken = alu_a_reg == alu_b_reg;
+                3'h1: real_branch_taken = alu_a_reg != alu_b_reg;
+                3'h4: real_branch_taken = ($signed(alu_a_reg) < $signed(alu_b_reg));
+                3'h5: real_branch_taken = ($signed(alu_a_reg) >= $signed(alu_b_reg));
+                3'h6: real_branch_taken = alu_a_reg < alu_b_reg;
+                3'h7: real_branch_taken = alu_a_reg >= alu_b_reg;
+                default: real_branch_taken = 1'b0;
             endcase
         end
         
@@ -81,11 +114,11 @@ module cpu (
     end
 
     always @(*) begin
-        case({branch_taken, ID_EX_jump, ID_EX_jalr})
-            3'b100, 3'b010: branch_target = (ID_EX_imm) + ID_EX_pc;
-            3'b011: branch_target = result;
-            3'b001: branch_target = alu_a_reg + ID_EX_imm;
-            default: branch_target = pc + 32'd4;
+        case({real_branch_taken, ID_EX_jump, ID_EX_jalr})
+            3'b100, 3'b010: real_branch_target = (ID_EX_imm) + ID_EX_pc;
+            3'b011: real_branch_target = result;
+            3'b001: real_branch_target = alu_a_reg + ID_EX_imm;
+            default: real_branch_target = pc + 32'd4;
         endcase
     end
     
@@ -107,16 +140,31 @@ module cpu (
         alu_a = ID_EX_opcode == 7'b0010111 ? ID_EX_pc  : alu_a_reg;
     end
 
-    
-    assign flush = branch_taken || ID_EX_jump || ID_EX_jalr;
+    wire branch_flush_ind;
 
+    assign branch_flush_ind = (ID_EX_branch) & (real_branch_taken ^ ID_EX_branch_taken);
+    
+    assign flush = branch_flush_ind || ID_EX_jump || ID_EX_jalr;
+
+
+
+    branch_predict bpredictor (
+        .clk(clk),
+        .pc(pc),
+        .ID_EX_branch(ID_EX_branch),
+        .ID_EX_pc(ID_EX_pc),
+        .ID_EX_real_branch_target(real_branch_target),
+        .ID_EX_real_branch_taken(real_branch_taken),
+        .branch_taken(branch_taken),
+        .branch_target(branch_target)
+    );
 
     prog_counter my_pc (
         .clk(clk),
         .rst(rst),
-      .b_ena(branch_taken || ID_EX_jump || ID_EX_jalr),
+        .b_ena(branch_taken || branch_flush_ind || ID_EX_jump || ID_EX_jalr),
         .addr(pc),
-        .target(branch_target),
+        .target(pc_branch_target),
         .stall(stall)
     );
 
@@ -217,6 +265,7 @@ module cpu (
         if(rst) begin
             IF_ID_pc <= 32'hFFFF_FFFF;
             IF_ID_instr <= 32'b0;
+            IF_ID_branch_taken <= 1'b0;
 
             ID_EX_pc <= 32'hFFFF_FFFF;
             ID_EX_reg_write <= 1'b0;
@@ -228,6 +277,7 @@ module cpu (
             ID_EX_jalr <= 1'b0;
             ID_EX_ALU_src <= 1'b0;
             ID_EX_ALU_sel <= 5'b0;
+            ID_EX_branch_taken <= 1'b0;
 
             EX_MEM_ALU_result    <= 32'b0;
             EX_MEM_r2            <= 32'b0;
@@ -242,6 +292,7 @@ module cpu (
             EX_MEM_zero          <= 1'b0;
             EX_MEM_overflow      <= 1'b0;
             EX_MEM_negative      <= 1'b0;
+            EX_MEM_real_branch_target <= 1'b0;
             EX_MEM_branch_target <= 1'b0;
             EX_MEM_pc            <= 32'hFFFF_FFFF;
 
@@ -262,11 +313,13 @@ module cpu (
             EX_MEM_branch        <= ID_EX_branch;
             EX_MEM_jump          <= ID_EX_jump;
             EX_MEM_jalr          <= ID_EX_jalr;
-            EX_MEM_branch_taken  <= branch_taken;
+            EX_MEM_branch_taken  <= ID_EX_branch_taken;
+            EX_MEM_real_branch_taken <= real_branch_taken;
             EX_MEM_zero          <= zero;
             EX_MEM_overflow      <= overflow;
             EX_MEM_negative      <= negative;
             EX_MEM_branch_target <= branch_target;
+            EX_MEM_real_branch_target <= real_branch_target;
             EX_MEM_pc            <= ID_EX_pc;
 			
               
@@ -285,6 +338,7 @@ module cpu (
               
                 IF_ID_instr <= 32'b0;
                 IF_ID_pc <= 32'hFFFF_FFFF;
+                IF_ID_branch_taken <= 1'b0;
 
                 ID_EX_reg_write <= 1'b0;
                 ID_EX_data_write <= 1'b0;
@@ -305,6 +359,7 @@ module cpu (
                 ID_EX_funct3 <= 3'b0;
                 ID_EX_funct7 <= 7'b0;
                 ID_EX_opcode <= 7'b0;
+                ID_EX_branch_taken <= 1'b0;
               
               	
             end
@@ -327,6 +382,7 @@ module cpu (
            else begin
             	IF_ID_pc         <= pc;
                 IF_ID_instr      <= instr;
+                IF_ID_branch_taken <= branch_taken;
 
                 // ID_EX Stage Update
                 ID_EX_pc         <= IF_ID_pc;
@@ -348,6 +404,7 @@ module cpu (
                 ID_EX_jalr       <= jalr;
                 ID_EX_ALU_src    <= ALU_src;
                 ID_EX_ALU_sel    <= sel;
+                ID_EX_branch_taken <= IF_ID_branch_taken;
 
 
                 //EX_MEM control signals
