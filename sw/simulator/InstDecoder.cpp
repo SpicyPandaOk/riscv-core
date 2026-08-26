@@ -93,7 +93,7 @@ DecodedInstr decode(uint32_t instr)
             d.imm += ((instr >> 12) & 0xff)  << 12;
             d.rd = (instr >> 7) & 0x1f;
             d.inst_type = InstType::J_type;
-            d.imm += (static_cast<int32_t>(instr) >>31) << 21;
+            d.imm +=  (static_cast<int32_t>(instr) >>31) << 21;
             break;
         }   
 

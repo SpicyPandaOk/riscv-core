@@ -1,11 +1,10 @@
 main:
-    li x10, 25 # n
+    li x10, 20 # n
     li x2,  1020 #sp
     call fib
 
 halt:
     j halt
-
 fib:
     beqz x10, base_case
 
