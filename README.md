@@ -1,9 +1,10 @@
 # Overview
-### RV32I CPU with 5 stage pipeline, made in largely verilog with occasional system verilog features. implements the base instruction set for RISC V with no expansions currently
+### RV32I CPU with 5 stage pipeline, made in largely verilog with occasional system verilog features. implements the base instruction set for RISC V with no expansions currently, implements branch prediction and a branch target buffer table. Also contains a cpp simulator to run the same program and check the results of the output
 
 ## pipelining
 Instruction Find (IF) -> Instruction decode (ID) -> Execute (EX) -> Memory (MEM) -> Write back (WB)
 branches get resolved in EX, forwarding comes from EX_MEM and MEM_WB
+implements branch prediction in IF_ID to avoid unnecessary flushes
 
 # repo layout
 ## docs 
@@ -13,7 +14,10 @@ includes the makefile and the file list for use in compiling with icarus verilog
 folder with all of the rtl itself in system verilog files
 
 ## sw
-Python assembler with a testbench paired assembly file as well as several functional programs
+Python assembler with a testbench paired assembly file as well as several functional programs and the cpp simulator
+## sw/simulator 
+contains all files related to the cpp simulator
+
 ## tb
 the test suite tb.sv along with a tb for running programs
 
