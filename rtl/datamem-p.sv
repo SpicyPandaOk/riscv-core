@@ -11,7 +11,7 @@ module data_mem(
     
     //integer i;
     // initial begin
-    //     for (i = 0; i < 524288; i = i + 1) begin
+    //     for (i = 0; i < 1073741824; i = i + 1) begin
     //         data[i] = 32'b0;
     //     end    
     // end
