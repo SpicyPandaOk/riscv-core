@@ -8,6 +8,7 @@ module data_mem(
     reg [31:0] data [0:511];
     wire [31:0] word;
     assign word = data[addr[31:2]];
+    
     //integer i;
     // initial begin
     //     for (i = 0; i < 524288; i = i + 1) begin
