@@ -30,6 +30,7 @@ module cpu (
     reg ID_EX_reg_write, ID_EX_mem_to_reg, ID_EX_data_read, ID_EX_data_write, ID_EX_branch, ID_EX_jump, ID_EX_jalr, ID_EX_ALU_src;
     reg [4:0] ID_EX_ALU_sel;
     reg ID_EX_branch_taken;
+    reg ID_EX_high;
 
 
 
@@ -41,10 +42,12 @@ module cpu (
     reg EX_MEM_real_branch_taken;
     reg [31:0] EX_MEM_real_branch_target;
     reg [31:0] EX_MEM_branch_target;
+    reg EX_MEM_high;
 
     reg [31:0] MEM_WB_ALU_result, MEM_WB_read_data, MEM_WB_pc;
     reg [4:0] MEM_WB_rd;
     reg MEM_WB_reg_write, MEM_WB_mem_to_reg, MEM_WB_jump;
+    reg MEM_WB_high;
 
     localparam R_type = 3'd0, I_type = 3'd1, S_type = 3'd2, B_type = 3'd3, U_type = 3'd4, J_type = 3'd5;
 
@@ -69,6 +72,8 @@ module cpu (
     reg real_branch_taken;
 
     reg [31:0] pc_branch_target;
+
+    wire high;
 
     always@(*) begin
         
@@ -217,13 +222,15 @@ module cpu (
         .funct3(ID_EX_funct3),
         .funct7(ID_EX_funct7),
         .imm(ID_EX_imm),
-        .sel(sel)
+        .sel(sel),
+        .high(high)
     );
 
     alu my_alu (
         .sel(sel),
         .r1(alu_a),
         .r2(alu_b),
+        .high(ID_EX_high),
         .result(result),
         .overflow(overflow),
         .negative(negative),
@@ -280,6 +287,7 @@ module cpu (
             ID_EX_ALU_src <= 1'b0;
             ID_EX_ALU_sel <= 5'b0;
             ID_EX_branch_taken <= 1'b0;
+            ID_EX_high <= 1'b0;
 
             EX_MEM_ALU_result    <= 32'b0;
             EX_MEM_r2            <= 32'b0;
@@ -297,11 +305,13 @@ module cpu (
             EX_MEM_real_branch_target <= 1'b0;
             EX_MEM_branch_target <= 1'b0;
             EX_MEM_pc            <= 32'hFFFF_FFFF;
+            EX_MEM_high <= 1'b0;
 
             MEM_WB_pc           <= 32'hFFFF_FFFF;
             MEM_WB_reg_write <= 1'b0;
             MEM_WB_mem_to_reg <= 1'b0;
             MEM_WB_jump <= 1'b0;
+            MEM_WB_high <= 1'b0;
         end
         else begin
           
@@ -323,6 +333,7 @@ module cpu (
             EX_MEM_branch_target <= branch_target;
             EX_MEM_real_branch_target <= real_branch_target;
             EX_MEM_pc            <= ID_EX_pc;
+            EX_MEM_high <= ID_EX_high;
 			
               
               
@@ -333,6 +344,7 @@ module cpu (
             MEM_WB_mem_to_reg    <= EX_MEM_mem_to_reg;
             MEM_WB_pc            <= EX_MEM_pc;
             MEM_WB_jump          <= EX_MEM_jump;
+            MEM_WB_high <= EX_MEM_high;
           
           
           
@@ -362,7 +374,7 @@ module cpu (
                 ID_EX_funct7 <= 7'b0;
                 ID_EX_opcode <= 7'b0;
                 ID_EX_branch_taken <= 1'b0;
-              
+                ID_EX_high <= 1'b0;
               	
             end
 
@@ -376,10 +388,12 @@ module cpu (
                 ID_EX_branch     <= 1'b0;
                 ID_EX_jump       <= 1'b0;
                 ID_EX_jalr       <= 1'b0;
-                
+                ID_EX_high <= 1'b0;
+
                 EX_MEM_reg_write <= ID_EX_reg_write;
                 EX_MEM_data_read <= ID_EX_data_read;
                 EX_MEM_data_write <= ID_EX_data_write;
+                EX_MEM_high <= ID_EX_high;
            end
            else begin
             	IF_ID_pc         <= pc;
@@ -407,12 +421,14 @@ module cpu (
                 ID_EX_ALU_src    <= ALU_src;
                 ID_EX_ALU_sel    <= sel;
                 ID_EX_branch_taken <= IF_ID_branch_taken;
+                ID_EX_high <= high;
 
 
                 //EX_MEM control signals
                 EX_MEM_reg_write    <= ID_EX_reg_write;
                 EX_MEM_data_read    <= ID_EX_data_read;
                 EX_MEM_data_write   <= ID_EX_data_write;
+                EX_MEM_high <= ID_EX_high;
 
               
            end

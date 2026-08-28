@@ -1,5 +1,5 @@
 main:
-    li x10, 35 # n
+    li x10, 20 # n
     li x2,  1020 #sp
     call fib
 

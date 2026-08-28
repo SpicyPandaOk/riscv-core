@@ -1,9 +1,9 @@
 start:
 
-    addi x1, x0, 10
-    beq x0, x0, halt
-    addi x1, x0, 20
-    j start
+    li x3, 5
+    li x4, 5
+    mul x5, x4, x3
+    
 
 halt:
     j halt

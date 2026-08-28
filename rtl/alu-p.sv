@@ -1,11 +1,13 @@
 module alu(
     input [4:0] sel,
     input [31:0] r1, r2,
+    input high,
     output reg [31:0] result,
     output reg overflow, negative, zero
 );
 
     wire [31:0] add_out, sub_out, xor_out, or_out, and_out, sll_out, srl_out, sra_out, slt_out, sltu_out;
+    wire[31:0] mult_out;
     add adder(.a(r1), .b(r2), .sum(add_out));
     sub subber(.a(r1), .b(r2), .difference(sub_out));
     xor_gate xorer(.a(r1), .b(r2), .result(xor_out));
@@ -16,6 +18,7 @@ module alu(
     sra sraer(.data(r1), .shamt(r2[4:0]), .result(sra_out));
     slt slter(.a(r1), .b(r2), .result(slt_out));
     sltu sltuer(.a(r1), .b(r2), .result(sltu_out));
+    mult multer(.a(r1), .b(r2), .high(high), .product(mult_out));
 
     always @(*) begin
         case(sel)
@@ -29,6 +32,7 @@ module alu(
             5'd7: result = sra_out;
             5'd8: result = slt_out;
             5'd9: result = sltu_out;
+            5'd10: result = mult_out;
             default: result = add_out;
         endcase
 

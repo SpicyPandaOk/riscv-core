@@ -35,6 +35,25 @@ module sub(
 endmodule
 
 
+module mult(
+    input [31:0] a, b,
+    input high,
+    output reg [31:0] product
+);
+    reg [63:0] temp_product;
+    integer i;
+    always @(*) begin
+        temp_product = 0;
+        for(i = 0; i < 32; i = i + 1) begin
+            if(b[i]) begin
+                temp_product = temp_product + (a << i);
+            end
+        end
+        product = (high) ? temp_product[63:32] : temp_product [31:0];
+    end
+
+endmodule
+
 module xor_gate(
     input [31:0] a, b,
     output [31:0] result
