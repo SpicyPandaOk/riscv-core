@@ -13,7 +13,8 @@
 
 
 module cpu (
-    input clk, rst
+    input clk, rst,
+    output [31:0] final_out
 );
 
     reg [31:0] IF_ID_pc;
@@ -146,6 +147,7 @@ module cpu (
     
     assign flush = branch_flush_ind || ID_EX_jump || ID_EX_jalr;
 
+    assign final_out = MEM_WB_ALU_result;
 
 
     branch_predict bpredictor (

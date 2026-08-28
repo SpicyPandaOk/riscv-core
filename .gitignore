@@ -6,3 +6,7 @@ sw/simulator/*.o
 sw/simulator/simulator
 sim/
 sw/*.asm
+synth/synth_log.txt
+synth/cpu_netlist.json
+synth/synth_netlist.v
+
