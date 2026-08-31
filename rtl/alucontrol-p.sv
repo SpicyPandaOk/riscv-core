@@ -23,6 +23,10 @@ module alu_control (
                         endcase
                         
                     end
+                    3'h1: begin
+                        sel = ALU_mul;
+                        high = 1;
+                    end
                     3'h4: sel = ALU_xor;
                     3'h6: sel = ALU_or;
                     3'h7: sel = ALU_and;

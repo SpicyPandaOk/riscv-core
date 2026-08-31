@@ -230,7 +230,7 @@ module cpu (
         .sel(sel),
         .r1(alu_a),
         .r2(alu_b),
-        .high(ID_EX_high),
+        .high(high),
         .result(result),
         .overflow(overflow),
         .negative(negative),
