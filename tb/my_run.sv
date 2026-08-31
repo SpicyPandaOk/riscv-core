@@ -73,12 +73,12 @@ initial begin
 
     $display("-----FINAL REGS-----");
     for(i = 0; i < 32; i = i + 1) begin
-        $display("x%0d = %0d", i, my_cpu.my_regs.registers[i]);
+        $display("x%0d = %0d", i, $signed(my_cpu.my_regs.registers[i]));
     end
 
     $display("-----FINAL DATA MEM-----");
     for(i = 0; i < 16; i = i + 1) begin
-        $display("mem[%0d] = %0d", i, my_cpu.my_dmem.data[i]);
+        $display("mem[%0d] = %0d", i, $signed(my_cpu.my_dmem.data[i]));
     end
     $finish;
 end

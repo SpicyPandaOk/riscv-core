@@ -1,8 +1,8 @@
 start:
 
-    li x3, 5
+    li x3, -5
     li x4, 5
-    mulh x5, x4, x3
+    mul x5, x4, x3
 
 
 halt:
