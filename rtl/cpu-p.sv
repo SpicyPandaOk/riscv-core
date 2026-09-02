@@ -73,7 +73,9 @@ module cpu (
 
     reg [31:0] pc_branch_target;
 
-    wire high;
+    reg high;
+    reg r1_unsigned;
+    reg r2_unsigned;
 
     always@(*) begin
         
@@ -223,7 +225,9 @@ module cpu (
         .funct7(ID_EX_funct7),
         .imm(ID_EX_imm),
         .sel(sel),
-        .high(high)
+        .high(high),
+        .r2_unsigned(r2_unsigned),
+        .r1_unsigned(r1_unsigned)
     );
 
     alu my_alu (
@@ -234,7 +238,9 @@ module cpu (
         .result(result),
         .overflow(overflow),
         .negative(negative),
-        .zero(zero)
+        .zero(zero),
+        .r1_unsigned(r1_unsigned),
+        .r2_unsigned(r2_unsigned)
     );
 
     data_mem my_dmem (

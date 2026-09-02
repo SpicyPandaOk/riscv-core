@@ -36,19 +36,19 @@ endmodule
 
 
 module mult(
-    input [31:0] a, b,
-    input high,
-    output reg [31:0] product
+    input  [31:0] a, b,
+    input high, r1_unsigned, r2_unsigned,
+    output  reg signed  [31:0] product
 );
-    reg [63:0] temp_product;
-    integer i;
-    always @(*) begin
-        temp_product = 0;
-        for(i = 0; i < 32; i = i + 1) begin
-            if(b[i]) begin
-                temp_product = temp_product + (a << i);
-            end
-        end
+    reg  [63:0] temp_product;
+    wire [63:0] a_s, b_s;
+
+
+    assign a_s = (r1_unsigned) ? {32'b0,a} : {{32{a[31]}},a};
+    assign b_s = (r2_unsigned) ? {32'b0,b} : {{32{b[31]}},b};
+    
+    always@(*) begin
+        temp_product = b_s * a_s;
         product = (high) ? temp_product[63:32] : temp_product [31:0];
     end
 
@@ -113,6 +113,9 @@ module sltu(
 );
     assign result = (a < b) ? 32'd1: 32'd0;
 endmodule
+
+
+
 
         
 
