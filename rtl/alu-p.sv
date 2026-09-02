@@ -7,7 +7,7 @@ module alu(
 );
 
     wire [31:0] add_out, sub_out, xor_out, or_out, and_out, sll_out, srl_out, sra_out, slt_out, sltu_out;
-    wire[31:0] mult_out;
+    wire[31:0] mult_out, div_out, rem_out;
     wire signed [31:0] a, b;
 
 
@@ -23,7 +23,8 @@ module alu(
     slt slter(.a(r1), .b(r2), .result(slt_out));
     sltu sltuer(.a(r1), .b(r2), .result(sltu_out));
     mult multer(.a(r1), .b(r2), .high(high), .product(mult_out), .r1_unsigned(r1_unsigned), .r2_unsigned(r2_unsigned));
-
+    div divider(.a(r1), .b(r2), .quotient(div_out), .remainder(rem_out), .r1_unsigned(r1_unsigned), .r2_unsigned(r2_unsigned));
+    
     always @(*) begin
         case(sel)
             5'd0: result = add_out;
@@ -37,6 +38,8 @@ module alu(
             5'd8: result = slt_out;
             5'd9: result = sltu_out;
             5'd10: result = mult_out;
+            5'd11: result = div_out;
+            5'd12: result = rem_out;
             default: result = add_out;
         endcase
 

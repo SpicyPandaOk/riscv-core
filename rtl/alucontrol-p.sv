@@ -10,7 +10,7 @@ module alu_control (
 );
 
     localparam ALU_add = 5'd0, ALU_sub = 5'd1, ALU_xor = 5'd2, ALU_or = 5'd3, ALU_and = 5'd4, ALU_sll = 5'd5, ALU_srl = 5'd6, ALU_sra = 5'd7, ALU_slt = 5'd8, ALU_sltu = 5'd9, ALU_mul = 5'd10;
-
+    localparam ALU_div = 5'd11, ALU_rem = 5'd12;
 
     always @(*) begin
         high = 0;
@@ -58,13 +58,44 @@ module alu_control (
                             7'h00: sel = ALU_sltu;
                         endcase
                     end
-                    3'h4: sel = ALU_xor;
-                    3'h6: sel = ALU_or;
-                    3'h7: sel = ALU_and;
-                    3'h1: sel = ALU_sll;
-                    3'h5: sel = (funct7 == 7'h00) ? ALU_srl : ALU_sra;
-                    3'h2: sel = ALU_slt;
-                    3'h3: sel = ALU_sltu;
+                    3'h4:begin
+                        case(funct7)
+                            7'h01: begin
+                                sel = ALU_div;
+                            end
+                            7'h00: sel = ALU_xor;
+                        endcase
+                    end
+                    3'h5: begin
+                        case(funct7)
+                            7'h01: begin
+                                sel = ALU_div;
+                                r1_unsigned = 1'b1;
+                                r2_unsigned = 1'b1;
+                            end
+                            7'h00: sel = ALU_srl;
+                            7'h20: sel = ALU_sra;
+                        endcase
+                    end
+                    3'h6: begin
+                        case(funct7)
+                            7'h01: begin
+                                sel = ALU_rem;
+
+                            end
+                            7'h00: sel = ALU_or;
+                        endcase
+                    end
+                    3'h7: begin
+                        case(funct7)
+                            7'h01: begin
+                                sel = ALU_rem;
+                                r1_unsigned = 1'b1;
+                                r2_unsigned = 1'b1;
+                            end
+                            7'h00: sel = ALU_and;
+                        endcase
+                    end
                     default: sel = ALU_add;
                 endcase
 

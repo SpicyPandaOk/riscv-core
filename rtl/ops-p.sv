@@ -54,6 +54,35 @@ module mult(
 
 endmodule
 
+
+module div(
+    input [31:0] a, b,
+    output reg signed [31:0] quotient, remainder,
+    input r1_unsigned, r2_unsigned
+);
+    wire signed [63:0] a_s, b_s;
+
+    assign a_s = (r1_unsigned) ? {32'b0,a} : {{32{a[31]}},a};
+    assign b_s = (r2_unsigned) ? {32'b0,b} : {{32{b[31]}},b};
+
+   
+    always@(*) begin
+        if(b_s == 32'b0) begin
+            quotient = 32'hffffffff;
+            remainder = a_s;
+        end
+        else if (a_s == 32'h80000000 && b_s == 32'hffffffff) begin
+            quotient = 32'h80000000;
+            remainder = 32'b0;
+        end
+        else begin
+            quotient = a_s / b_s;
+            remainder = a_s % b_s;
+        end
+    end
+endmodule
+ 
+
 module xor_gate(
     input [31:0] a, b,
     output [31:0] result

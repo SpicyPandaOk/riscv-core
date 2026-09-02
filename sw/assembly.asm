@@ -1,8 +1,9 @@
 start:
 
-    li x3, 5
-    li x4, -5
-    mulsu x5, x4, x3
+    li x3,2
+    li x4,-7
+
+    rem x5, x4, x3
 
 
 halt:
