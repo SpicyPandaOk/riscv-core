@@ -1,10 +1,12 @@
 start:
 
-    li x3,2
-    li x4,-7
-    sw x4, 0(x0)
-    lw x5, 0(x0)
+    li x3, 202222222
+    la x4, return
+    call test_loop
 
+test_loop:
+    li x10, 123
+    jalr x1, x4, 0
 
-halt:
-    j halt
+return:
+    j return

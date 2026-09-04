@@ -99,7 +99,6 @@ pseudo_map = {
     'j':('jal', ['x0', '{0}']),
     'jr':('jalr', ['x0', '{0}', '0']),
     'ret':('jalr', ['x0', 'x1', '0']),
-    'call':('jal', ['x1', '{0}'])
 }
 
 hexout = ""
@@ -119,12 +118,12 @@ def decode_pseudo(pseudo_code, operands):
 
     return ret_line + "\n"
 
-def adv_decode(pseudo_code, operands):
+def li_decode(operands):
     final_line = []
     temp_line = ""
+    
     imm = int(operands[1])
-    if imm >= 2047 or imm <= -2048 :
-
+    if imm >= 2047 or imm <= -2048:
         upper =  (imm + 0x800) >> 12
         lower = imm - (upper << 12)
         temp_line =  "lui " + operands[0] + ", " + str(upper)
@@ -136,17 +135,28 @@ def adv_decode(pseudo_code, operands):
     else:
         temp_line += "addi " + operands[0] + ", "  + "x0, " + str(imm)
         final_line.append(temp_line)
-
     return final_line
+
+def call_decode(operands):
+    symbol = operands[0].strip()
+    return [f"auipc x1, %hi({symbol})\n", f"jalr x1, x1, %lo({symbol})\n"]
+
+def la_decode(operands):
+    rd = operands[0].strip()
+    symbol = operands[1].strip()
+    return [f"auipc {rd}, %hi({symbol})\n", f"addi {rd}, {rd}, %lo({symbol})\n"]
+
 
 
 
 
 with open(asm_path, 'r') as file:
-
+    pc_count = 0;
     pseudo_content = file.readlines()
     print_line = ""
     content = []
+
+
     for line in pseudo_content:
         stripped = line.strip().split('#')[0]
         if stripped and not stripped.endswith(":"):
@@ -159,14 +169,23 @@ with open(asm_path, 'r') as file:
                 new_cont = decode_pseudo(instr, operands)
                 content.append(new_cont)
             elif instr == "li":
-
-                new_cont = adv_decode(instr, operands)
+                new_cont = li_decode(operands)
+                for line in new_cont:
+                    content.append(line)
+            elif instr == "call":
+                new_cont = call_decode(operands)
+                for line in new_cont:
+                    content.append(line)
+            elif instr == "la":
+                new_cont = la_decode(operands)
                 for line in new_cont:
                     content.append(line)
             else:
                 content.append(line)
+            pc_count += 4
         else:
-            content.append(line)
+            content.append(line) 
+
 
 
 
@@ -233,10 +252,16 @@ with open(asm_path, 'r') as file:
                 funct3 = entry[1]
                 rd = int(params[0].strip("x "))
                 rs1 = int(params[1].strip("x "))
-                try:
-                     immparam = int(params[2].strip()) & 0xFFF
-                except ValueError:
-                        immparam = (labels[params[2].strip()] - (count - 4)) & 0xFFF
+                lo_match = re.match(r'%lo\((\w+)\)', params[2].strip())
+                if lo_match:
+                    addr = labels[lo_match.group(1)]- (count-4)
+                    upper = (addr + 0x800) >> 12
+                    immparam = (addr - (upper << 12)) & 0xFFF
+                else:
+                    try:
+                        immparam = int(params[2].strip()) & 0xFFF
+                    except ValueError:
+                            immparam = (labels[params[2].strip()] - (count - 4)) & 0xFFF
                 if funct3 == 0x1 or funct3 == 0x5:
                     if(immparam > 31):
                         print(f"immediate is too large for shift, will be truncated at {index}, {tokens[0]}")
@@ -320,17 +345,26 @@ with open(asm_path, 'r') as file:
             
             elif opcode in (0b0110111, 0b0010111) and len(params) == 2: #lui, auipc
                 rd = int(params[0].strip("x "))
-                imm = int(params[1].strip(), 16) if '0x' in params[1] else int(params[1].strip())
-                imm = imm & 0xFFFFF
-                
+                hi_match = re.match(r'%hi\((\w+)\)', params[1].strip())
+                if hi_match:
+                    addr = labels[hi_match.group(1)]-count
+                    imm = (addr + 0x800) >> 12
+                else:
+                    imm = int(params[1].strip(), 16) if '0x' in params[1] else int(params[1].strip())
+                imm &= 0xFFFFF
                 intline = (imm << 12) | (rd << 7) | opcode
 
             elif opcode == 0b1100111 and len(params) == 3: # jalr
                 funct3 = entry[1]
                 rd = int(params[0].strip("x "))
                 rs1 = int(params[1].strip("x "))
-                imm = int(params[2].strip()) & 0xFFF
-                
+                lo_match = re.match(r'%lo\((\w+)\)', params[2].strip())
+                if lo_match:
+                    addr = labels[lo_match.group(1)] - (count -4)
+                    imm = addr & 0xFFF
+                else:
+                    imm = int(params[2].strip()) & 0xFFF
+
                 intline = (imm << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
 
             elif opcode == 0b1100111 and len(params) == 1: #jalr shortcut
