@@ -83,6 +83,13 @@ module instdecoder (
                 imm[31:21] = {11{instr[31]}};
             end
 
+            //HALT instruction
+            7'b1110011: begin
+                imm = 1;
+                opcode = instr[6:0];
+                inst_type = I_type;
+            end
+
 
         endcase
     end

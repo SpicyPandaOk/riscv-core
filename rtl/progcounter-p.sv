@@ -1,6 +1,6 @@
 module prog_counter(
     input clk, rst, b_ena,
-    input stall,
+    input stall, halt,
     input [31:0] target,
     output reg [31:0] addr
 );
@@ -12,6 +12,9 @@ module prog_counter(
         else begin
             if(rst) begin
                 addr <= 0;
+            end
+            else if (halt) begin
+                addr <= addr;
             end
             else if (b_ena) begin
                 addr <= target;

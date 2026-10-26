@@ -3,7 +3,7 @@ main:
     call sum_to
 
 halt:
-    j halt
+    ebreak
 
 sum_to:
     add x3, x10, x3

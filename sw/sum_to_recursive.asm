@@ -4,7 +4,7 @@ main:
     call sum_to
 
 halt:
-    j halt
+    ebreak
 
 sum_to:
     beqz x10, base_case

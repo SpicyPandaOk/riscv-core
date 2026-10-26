@@ -67,7 +67,8 @@ my_map = {
     'div': (0b0110011, 0x4, 0x01),
     'divu': (0b0110011, 0x5, 0x01),
     'rem': (0b0110011, 0x6, 0x01), 
-    'remu': (0b0110011, 0x7, 0x01)
+    'remu': (0b0110011, 0x7, 0x01),
+    'ebreak': (0b1110011, 0x0, 0x00)
 
 }
 
@@ -102,7 +103,6 @@ pseudo_map = {
 }
 
 hexout = ""
-
 def decode_pseudo(pseudo_code, operands):
     temp_line = ""
     new_op, template = pseudo_map[pseudo_code]
@@ -147,7 +147,41 @@ def la_decode(operands):
     return [f"auipc {rd}, %hi({symbol})\n", f"addi {rd}, {rd}, %lo({symbol})\n"]
 
 
-
+register_map = {
+    "zero" : "x0",
+    "ra" : "x1",
+    "sp" : "x2",
+    "gp" : "x3",
+    "tp" : "x4",
+    "t0" : "x5",
+    "t1" : "x6",
+    "t2" : "x7",
+    "s0" : "x8",
+    "fp" : "x8",
+    "s1" : "x9",
+    "a0" : "x10",
+    "a1" : "x11",
+    "a2" : "x12",
+    "a3" : "x13",
+    "a4" : "x14",
+    "a5" : "x15",
+    "a6" : "x16",
+    "a7" : "x17",
+    "s2": "x18",
+    "s3" : "x19",
+    "s4" : "x20",
+    "s5" : "x21",
+    "s6" : "x22",
+    "s7" : "x23",
+    "s8" : "x24",
+    "s9" : "x25",
+    "s10" :"x26",
+    "s11" : "x27",
+    "t3" : "x28",
+    "t4" : "x29",
+    "t5" : "x30",
+    "t6" : "x31"
+}
 
 
 with open(asm_path, 'r') as file:
@@ -186,13 +220,7 @@ with open(asm_path, 'r') as file:
         else:
             content.append(line) 
 
-
-
-
-
-
     hexline = 0
-
     labels = {}
     count = 0
     for line in content:
@@ -203,9 +231,6 @@ with open(asm_path, 'r') as file:
         elif stripped and not stripped.startswith('#'):
             count += 4
 
-
-
-
     count = 0
     for index, line in enumerate(content):
         line = line.split("#")[0]
@@ -214,22 +239,36 @@ with open(asm_path, 'r') as file:
         valid_instr = True
         if len(tokens) == 1 and tokens[0].strip().endswith(':'):
             continue
-        if len(tokens) == 2: #if has an instr and params
+
+
+        if len(tokens) == 2 or ("ebreak" in line): #if has an instr and params
             try: 
                 entry = my_map[tokens[0].strip()]
                 opcode = (entry[0])
 
-                if opcode != 0b0000011 and opcode != 0b0100011:
+                if("ebreak" in line):
+                    params = []     
+                elif opcode != 0b0000011 and opcode != 0b0100011:
                     params = tokens[1].split(',')
                 else:
                     params = [p.strip("x )\n") for p in re.split(r'[,(]', tokens[1])]
+
+
+                for index, arg in  enumerate(params):
+                    if arg in register_map:
+                        params[index] = register_map[arg]
+                        
+
+
+
            
                     
-
+            
             except KeyError:
                 print(f"malformed instruction, key not in values at {index}, {tokens[0]}")
                 valid_instr = False
                 continue
+
 
             if opcode == 0b0110011 and len(params) == 3: #for R type if has the right number params
                 
@@ -375,6 +414,13 @@ with open(asm_path, 'r') as file:
                 
                 intline = (imm << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
 
+            elif opcode == 0b1110011 and len(params) == 0:
+                imm = 0
+                rd = 0
+                rs1 = 0
+                funct3 = 0
+
+                intline = (imm << 20 | rs1 << 15 | funct3 << 12 | rd << 7 | opcode)
 
             else:
                 print(f"Unhandled instruction or missing opcode handler on line {index}: {tokens[0]}")

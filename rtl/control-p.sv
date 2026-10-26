@@ -1,6 +1,6 @@
 module control(
     input [6:0] opcode,
-    output reg reg_write, data_write, data_read, mem_to_reg, ALU_src, branch, jump, jalr
+    output reg reg_write, data_write, data_read, mem_to_reg, ALU_src, branch, jump, jalr, halt
 
 );
 
@@ -14,6 +14,7 @@ module control(
         branch = 0;
         jump = 0;
         jalr = 0;
+        halt = 0;
         case (opcode)
             7'b0110011: begin
                 reg_write = 1;
@@ -54,6 +55,9 @@ module control(
             7'b0110111, 7'b0010111: begin
                 reg_write = 1;
                 ALU_src = 1;
+            end
+            7'b1110011: begin
+                halt = 1;
             end
         endcase
     end

@@ -51,7 +51,7 @@ endtask
 
 
 task run_prog;
-    while(same_pc_count < halt_thresh) begin
+    while(!my_cpu.MEM_WB_halt) begin
         @(posedge clk);
     end
 endtask    
@@ -83,7 +83,7 @@ initial begin
     $finish;
 end
 
-/*initial begin
+initial begin
     stall_time(500000);
-end*/
+end
 endmodule

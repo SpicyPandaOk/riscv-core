@@ -1,9 +1,9 @@
-PROGRAM ?= assembly.asm
+PROGRAM ?= assembly
 
 .PHONY: compare rtl rtl-run cpp cpp-run assemble clean-compare
 
 assemble:
-	python3 sw/assembler.py sw/$(PROGRAM)
+	python3 sw/assembler.py sw/$(PROGRAM).asm
 
 
 
@@ -13,10 +13,10 @@ compare: rtl-run cpp-run
 	diff /tmp/rtl_filtered.txt /tmp/cpp_filtered.txt && echo "MATCH" || echo "MISMATCH"
 
 rtl-run:
-	$(MAKE) -C docs run PROGRAM=../sw/$(PROGRAM) > /tmp/rtl_out.txt
+	$(MAKE) -C docs run PROGRAM=../sw/$(PROGRAM).asm > /tmp/rtl_out.txt
 
 rtl:
-	$(MAKE) -C docs run PROGRAM=../sw/$(PROGRAM)
+	$(MAKE) -C docs run PROGRAM=../sw/$(PROGRAM).asm
 
 rtl-test:
 	$(MAKE) -C docs test

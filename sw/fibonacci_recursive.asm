@@ -4,7 +4,7 @@ main:
     call fib
 
 halt:
-    j halt
+    ebreak
 fib:
     beqz x10, base_case
 
